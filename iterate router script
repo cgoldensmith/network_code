@@ -1,0 +1,91 @@
+from netmiko import Netmiko
+from netmiko import ConnectHandler
+from netmiko import NetmikoTimeoutException
+from netmiko import NetmikoAuthenticationException
+from netmiko import ReadTimeout
+
+# <iterate through list of routers in text file>
+
+routers = []
+
+#initialize array of strings python
+cannot_ssh_list = list()
+completed_list = list()
+read_timeout = list()
+
+#Open the file in read mode
+#routers.txt should be text file list of devices to iterate through
+with open('routers.txt', 'r') as file:
+    # Read and append each line to the list
+    for routers in file:
+        try:    
+            #string_list.append(routers)
+            print('ip: ' + routers.strip() )
+            device = {
+                'device_type': 'cisco_ios',
+                'ip': routers.strip(),
+                'username': 'TNADM_A8GF',
+                'password': '8wLL5VLlcwMYzSaVOLJ9',
+            }
+            #print(device)
+            
+            connection = ConnectHandler(**device)
+            connection.enable()
+          
+            #print('login successful to ' + connection.send_command('show run | i hostname') + '\n')
+            #print('dns config:\n' + connection.send_command('show run | i dhcpd dns') + '\n')
+          
+            print(connection.send_config_from_file('dc_config.txt'))
+            
+            print(connection.save_config())
+            completed_list.append(routers)
+            connection.disconnect()
+            
+        except NetmikoTimeoutException as err:
+            exception_type = type(err).__name__
+            print('cannot log into ' + routers.strip() + '\n')
+            cannot_ssh_list.append(routers)
+        except ReadTimeout as err: 
+            read_timeout.append(routers)
+        except NetmikoAuthenticationException as err: 
+            try:
+                print(' wrong credentials, trying ' + routers.strip() + ' again ...')
+                device = {
+                    'device_type': 'cisco_ios',
+                    'ip': routers.strip(),
+                    'username': 'EuroEng',
+                    'password': 'C5pt3a1nM@rv3lo6s',
+                }
+                
+                connection = ConnectHandler(**device)
+                connection.enable()
+                print('login successful to ' + connection.send_command('show run | i hostname') + '\n')
+                connection.disconnect()      
+            except NetmikoTimeoutException as err:
+                exception_type = type(err).__name__
+                print('cannot log into ' + routers.strip() + '\n')
+                cannot_ssh_list.append(routers)
+            except NetmikoAuthenticationException as err:
+                print('still cannot log into ' + routers.strip() + '\n')
+                cannot_ssh_list.append(routers)
+                
+print("\ncannot ssh to:\n")
+
+for x in cannot_ssh_list:
+    print(x.strip())
+
+print("\nchecked successfully:\n")
+
+for x in completed_list:
+    print(x.strip())
+
+print("\nread timeout:\n")
+
+for x in read_timeout:
+    print(x.strip())
+
+#ssh connection to a device with netmiko
+#https://medium.com/@DevOpsNuts/ssh-connection-to-a-device-with-netmiko-73ca1c773ee9
+
+#python exception handling
+#https://www.geeksforgeeks.org/python-exception-handling/
