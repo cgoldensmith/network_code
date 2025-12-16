@@ -24,8 +24,8 @@ with open('routers.txt', 'r') as file:
             device = {
                 'device_type': 'cisco_ios',
                 'ip': routers.strip(),
-                'username': 'TNADM_A8GF',
-                'password': '8wLL5VLlcwMYzSaVOLJ9',
+                'username': 'username',
+                'password': 'password',
             }
             #print(device)
             
