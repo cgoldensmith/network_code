@@ -53,8 +53,8 @@ with open('routers.txt', 'r') as file:
                 device = {
                     'device_type': 'cisco_ios',
                     'ip': routers.strip(),
-                    'username': 'EuroEng',
-                    'password': 'C5pt3a1nM@rv3lo6s',
+                    'username': 'username',
+                    'password': 'password',
                 }
                 
                 connection = ConnectHandler(**device)
